@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { PrismaService } from './prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { supabase } from './config/supabase.config';
-import { RegistrationType, Role } from '../generated/prisma';
+import { RegistrationType, Role } from '@prisma/client';
 
 
 
@@ -41,8 +41,8 @@ export class AuthService {
             data: {
                email: supabaseUser.email!,
                name: supabaseUser.user_metadata.full_name || supabaseUser.user_metadata?.name || supabaseUser.email!.split('@')[0],
-               role,
-               registrationType
+               role: role,
+               registrationType: registrationType || null,
             },
             include: {profile: true},
          })

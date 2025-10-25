@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,7 +14,7 @@ datasource db {
 }
 
 
-enum Role {   
+enum Role {
   ADMIN
   CL
   PRNC
@@ -35,11 +34,11 @@ enum RegistrationType {
 model User {
   id                  Int     @id @default(autoincrement())
   userId              String  @unique @default(cuid())
-  email               String  @unique 
-  name                String  
-  registrationType    RegistrationType?  
+  email               String  @unique
+  name                String
+  registrationType    RegistrationType?
   isBlocked           Boolean            @default(false)
-  role                Role    @default(CL) 
+  role                Role    @default(CL)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
   profile             Profile?
@@ -50,13 +49,13 @@ model User {
 
 model Profile {
   id              Int         @id @default(autoincrement())
-  user            User        @relation(fields: [userId], references: [userId]) 
-  userId          String      @unique 
-  contact         String 
-  aadhaar         String      @unique  
-  aadhaarFileUrl  String   
-  collegeIdUrl    String 
-  collegeName     String 
+  user            User        @relation(fields: [userId], references: [userId])
+  userId          String      @unique
+  contact         String
+  aadhaar         String      @unique
+  aadhaarFileUrl  String
+  collegeIdUrl    String
+  collegeName     String
   status          Status  @default(PENDING)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
@@ -68,21 +67,21 @@ model Profile {
 
 model Participant {
   id              Int      @id @default(autoincrement())
-  name            String   
-  collegeName     String   
-  email           String   
-  contact         String   
+  name            String
+  collegeName     String
+  email           String
+  contact         String
   aadhaar         String
-  aadhaarFileUrl  String   
-  idFileUrl       String   
+  aadhaarFileUrl  String
+  idFileUrl       String
   cl              User    @relation(fields: [clId], references: [userId], onDelete: Cascade)
-  clId            String   
+  clId            String
   event           Event   @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
   eventId         String
   status          Status   @default(PENDING)
-  submittedAt     DateTime? 
+  submittedAt     DateTime?
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt   
+  updatedAt       DateTime @updatedAt
 
   @@unique([email, eventId])
   @@index([clId])
@@ -95,12 +94,12 @@ model Event {
   id          Int          @id @default(autoincrement())
   eventId     String       @unique @default(cuid())
   name        String
-  category    String       
+  category    String
   isActive    Boolean      @default(true)
   description String?
   maxSlots    Int          @default(1)
   minSlots    Int          @default(0)
-  isLocked    Boolean      @default(false) 
+  isLocked    Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 

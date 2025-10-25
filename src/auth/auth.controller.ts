@@ -1,5 +1,14 @@
-import { BadRequestException, Body, Controller, Get, HttpStatus, Post, Res, UseGuards } from '@nestjs/common';
-import { RegistrationType, Role } from '../generated/prisma';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Post,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { RegistrationType, Role, User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-roles.guard';
@@ -14,67 +23,69 @@ class ValidateTokenDto {
 
 @Controller('auth')
 export class AuthController {
+  constructor(private readonly authService: AuthService) {}
 
-    constructor(private  readonly authService: AuthService) {}
+  @Post('validate')
+  async validateToken(@Body() body: ValidateTokenDto, @Res() res: Response) {
+    try {
+      const { user, token } = await this.authService.validateToken(
+        body.access_token,
+        body.registration_type,
+      );
 
-    @Post('validate')
-    async validateToken(@Body() body: ValidateTokenDto, @Res() res: Response) {
-        try {
-            const {user, token} = await this.authService.validateToken(body.access_token, body.registration_type);
-
-            res.cookie('access_token', token, {
-                httpOnly: true,
-                secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
-                maxAge:  7 * 24 * 60 * 60 * 1000,
-            });
-            return res.status(HttpStatus.OK).json({
-                user: {
-                    userId: user.userId,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role,
-                    registrationType: user.registrationType,
-                    profile: user.profile ? {
-                        status: user.profile.status,
-                        collegeName: user.profile.collegeName, 
-                    } : null
-                }
-            })
-        } catch(error) {
-            return res.status(HttpStatus.UNAUTHORIZED).json({
-                message: error.message
-            })
-        }
+      res.cookie('access_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+      return res.status(HttpStatus.OK).json({
+        user: {
+          userId: user.userId,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          registrationType: user.registrationType,
+          profile: user.profile
+            ? {
+                status: user.profile.status,
+                collegeName: user.profile.collegeName,
+              }
+            : null,
+        },
+      });
+    } catch (error) {
+      return res.status(HttpStatus.UNAUTHORIZED).json({
+        message: error.message,
+      });
     }
+  }
 
-    @Get('me')
-    @UseGuards(JwtAuthGuard)
-    async getCurrentUser(@CurrentUser() user) {
-        return this.authService.getUserInfo(user.userId);
-    }
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  async getCurrentUser(@CurrentUser() user: User) {
+    return this.authService.getUserInfo(user.userId);
+  }
 
+  @Get('can-access-dashboard')
+  @UseGuards(JwtAuthGuard)
+  async canAccessDashboard(@CurrentUser() user: User) {
+    const canAccess = await this.authService.canAccessDashboard(user.userId);
 
-    @Get('can-access-dashboard')
-    @UseGuards(JwtAuthGuard)
-    async canAccessDashboard(@CurrentUser() user) {
-        const canAccess = await this.authService.canAccessDashboard(user.userId);
+    return { canAccess };
+  }
 
-        return {canAccess}; 
-    }
+  //clearing auth cookie
+  @Post('logout')
+  async logout(@Res() res: Response) {
+    res.clearCookie('access_token');
+    return res.json({ message: 'Logged out successfully' });
+  }
 
-    //clearing auth cookie 
-    @Post('logout')
-    async logout(@Res() res: Response) {
-        res.clearCookie('access_token');
-        return res.json({message: 'Logged out successfully'});
-    }
-
-
-    //admin blocking user access 
-   @Post('block-user')
-    @UseGuards(JwtAuthGuard, RolesGuard)
-    @Roles(Role.ADMIN)
+  //admin blocking user access
+  @Post('block-user')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   async blockUser(@Body('userId') userId: string) {
     if (!userId) {
       throw new BadRequestException('userId is required');
@@ -96,7 +107,4 @@ export class AuthController {
     await this.authService.unblockUser(userId);
     return { message: 'User unblocked successfully' };
   }
-    
-
-
 }
