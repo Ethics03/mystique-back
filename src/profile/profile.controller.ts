@@ -99,7 +99,7 @@ export class ProfileController {
   }
 
   //approve profile
-  @Patch('id:/approve')
+  @Patch(':id/approve')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async approveProfile(
@@ -110,7 +110,7 @@ export class ProfileController {
   }
 
   //reject profile
-  @Patch('id:/reject')
+  @Patch(':id/reject')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   async rejectProfile(

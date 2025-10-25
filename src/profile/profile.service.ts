@@ -120,7 +120,7 @@ export class ProfileService {
 
   //admin access to profile
   async getAllProfiles(filters?: ProfileFilters): Promise<ProfileWithUser[]> {
-    const where: Prisma.ProfileWhereInput = {};
+    const where: any = {};
 
     if (filters?.status) {
       where.status = filters.status;
