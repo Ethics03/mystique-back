@@ -8,18 +8,14 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { RegistrationType, Role, User } from '@prisma/client';
+import { Role, User } from '@prisma/client';
 import { AuthService } from './auth.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from './guards/jwt-roles.guard';
 import { CurrentUser } from './decorators/user.decorator';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from './decorators/roles.decorator';
-
-class ValidateTokenDto {
-  access_token: string;
-  registration_type?: RegistrationType;
-}
+import { ValidateTokenDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {

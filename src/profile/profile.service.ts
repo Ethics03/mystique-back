@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../auth/prisma.service';
 import { Profile, Status } from '@prisma/client';
-import { Prisma } from '../generated/prisma/client';
 
 interface ProfileFilters {
   status?: Status;
@@ -30,7 +29,6 @@ export class ProfileService {
     userId: string,
     data: {
       contact: string;
-      aadhaar: string;
       aadhaarFileUrl: string;
       collegeIdUrl: string;
       collegeName: string;
@@ -44,19 +42,10 @@ export class ProfileService {
       throw new BadRequestException('Profile already exists');
     }
 
-    const aadhaarExists = await this.prisma.profile.findUnique({
-      where: { aadhaar: data.aadhaar },
-    });
-
-    if (aadhaarExists) {
-      throw new BadRequestException('Aadhar number already registered');
-    }
-
     return await this.prisma.profile.create({
       data: {
         userId,
         contact: data.contact,
-        aadhaar: data.aadhaar,
         aadhaarFileUrl: data.aadhaarFileUrl,
         collegeIdUrl: data.collegeIdUrl,
         collegeName: data.collegeName,
@@ -81,7 +70,6 @@ export class ProfileService {
     userId: string,
     data: {
       contact?: string;
-      aadhaar?: string;
       aadhaarFileUrl?: string;
       collegeIdUrl?: string;
       collegeName?: string;
@@ -97,16 +85,6 @@ export class ProfileService {
 
     if (profile.status !== Status.REJECTED) {
       throw new ForbiddenException('can only update rejected profiles');
-    }
-
-    if (data.aadhaar && data.aadhaar !== profile.aadhaar) {
-      const aadharExists = await this.prisma.profile.findUnique({
-        where: { aadhaar: data.aadhaar },
-      });
-
-      if (aadharExists) {
-        throw new BadRequestException('Aadhar number already registered');
-      }
     }
 
     return this.prisma.profile.update({

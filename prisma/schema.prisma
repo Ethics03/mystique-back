@@ -52,7 +52,6 @@ model Profile {
   user            User        @relation(fields: [userId], references: [userId])
   userId          String      @unique
   contact         String
-  aadhaar         String      @unique
   aadhaarFileUrl  String
   collegeIdUrl    String
   collegeName     String

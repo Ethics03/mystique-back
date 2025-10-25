@@ -14,11 +14,6 @@ export class CreateProfileDto {
 
   @IsString()
   @IsNotEmpty()
-  @Matches(/^[0-9]{12}$/, { message: 'Aadhaar must be 12 digits' })
-  aadhaar: string;
-
-  @IsString()
-  @IsNotEmpty()
   aadhaarFileUrl: string;
 
   @IsString()
@@ -36,11 +31,6 @@ export class UpdateProfileDto {
   @IsString()
   @Matches(/^[0-9]{10}$/, { message: 'Contact must be 10 digits' })
   contact?: string;
-
-  @IsOptional()
-  @IsString()
-  @Matches(/^[0-9]{12}$/, { message: 'Aadhaar must be 12 digits' })
-  aadhaar?: string;
 
   @IsOptional()
   @IsString()
