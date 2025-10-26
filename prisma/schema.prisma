@@ -88,6 +88,9 @@ model Participant {
  
 }
 
+
+
+
 model Event {
   id          Int          @id @default(autoincrement())
   eventId     String       @unique @default(cuid())

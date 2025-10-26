@@ -259,7 +259,7 @@ export class ParticipantsService {
         this.prisma.participant.update({
           where: { id },
           data: {
-            ...data,
+            ...data, 
             status: Status.PENDING, 
           },
         }),
