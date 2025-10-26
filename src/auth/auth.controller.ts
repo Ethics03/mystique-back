@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Post,
   Res,
@@ -19,7 +20,7 @@ import { ValidateTokenDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Post('validate')
   async validateToken(@Body() body: ValidateTokenDto, @Res() res: Response) {
@@ -44,9 +45,9 @@ export class AuthController {
           registrationType: user.registrationType,
           profile: user.profile
             ? {
-                status: user.profile.status,
-                collegeName: user.profile.collegeName,
-              }
+              status: user.profile.status,
+              collegeName: user.profile.collegeName,
+            }
             : null,
         },
       });
@@ -73,9 +74,20 @@ export class AuthController {
 
   //clearing auth cookie
   @Post('logout')
-  async logout(@Res() res: Response) {
-    res.clearCookie('access_token');
-    return res.json({ message: 'Logged out successfully' });
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async logout(@Res({ passthrough: true }) response: Response) {
+
+    response.clearCookie('access_token', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+
+    return {
+      message: 'Logged out successfully',
+    };
   }
 
   //admin blocking user access
