@@ -1,4 +1,3 @@
-// src/auth/dto/validate-token.dto.ts
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { RegistrationType } from '@prisma/client';
 
@@ -11,4 +10,3 @@ export class ValidateTokenDto {
   @IsEnum(RegistrationType)
   registration_type?: RegistrationType;
 }
-

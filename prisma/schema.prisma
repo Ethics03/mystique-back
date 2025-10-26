@@ -70,7 +70,6 @@ model Participant {
   collegeName     String
   email           String
   contact         String
-  aadhaar         String
   aadhaarFileUrl  String
   idFileUrl       String
   cl              User    @relation(fields: [clId], references: [userId], onDelete: Cascade)
@@ -86,7 +85,7 @@ model Participant {
   @@index([clId])
   @@index([eventId])
   @@index([status])
-  @@unique([aadhaar, eventId])
+ 
 }
 
 model Event {
@@ -96,8 +95,10 @@ model Event {
   category    String
   isActive    Boolean      @default(true)
   description String?
-  maxSlots    Int          @default(1)
-  minSlots    Int          @default(0)
+  minTeamSize      Int
+  maxTeamSize      Int
+  maxSlots         Int
+  filledSlots      Int      @default(0)
   isLocked    Boolean      @default(false)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

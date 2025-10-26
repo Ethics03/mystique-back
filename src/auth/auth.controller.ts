@@ -52,7 +52,7 @@ export class AuthController {
       });
     } catch (error) {
       return res.status(HttpStatus.UNAUTHORIZED).json({
-        message: error.message,
+        message: `you are unauthorized: ${error}`,
       });
     }
   }

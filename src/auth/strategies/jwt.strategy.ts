@@ -1,49 +1,46 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { AuthService } from "../auth.service";
-import { Request } from "express";
-import { JwtPayload } from "@supabase/supabase-js";
+import { Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
+import { Role } from '@prisma/client';
+
+interface JwtPayload {
+  sub: string;
+  email: string;
+  role: Role;
+}
+
+interface validateResponse {
+  userId: string;
+  email: string;
+  role: string;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(
-        private authService: AuthService,
-        
-    ) {
-        const jwtSecret = process.env.JWT_SECRET_KEY;
-        if (!jwtSecret) {
-            throw new Error('JWT_SECRET is not defined in environment variables');
-        }
-        
-        super({
-            jwtFromRequest: ExtractJwt.fromExtractors([
-                (request: Request) => {
-                    return request?.cookies?.auth_token;
-                },
-                ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ]),
-            ignoreExpiration: false,
-            secretOrKey: jwtSecret,
-        });
+  constructor() {
+    const jwtSecret = process.env.JWT_SECRET_KEY;
+    if (!jwtSecret) {
+      throw new Error('JWT_SECRET is not defined in environment variables');
     }
 
-    
+    super({
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        (request: Request) => {
+          return request?.cookies?.access_token;
+        },
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
+      ignoreExpiration: false,
+      secretOrKey: jwtSecret,
+    });
+  }
 
-    async validate(payload: JwtPayload) {
-        try {
-            if (!payload.sub) {
-                throw new UnauthorizedException('Invalid token payload');
-            }
-            
-            const token = await this.authService.validateToken(payload.sub);
-            if (!token) {
-                throw new UnauthorizedException('Token validation failed');
-            }
-            
-            return token;
-        } catch (error) {
-            throw new UnauthorizedException(error.message || 'Token validation failed');
-        }
-    }
+  async validate(payload: JwtPayload): Promise<validateResponse> {
+    return {
+      userId: payload.sub,
+      email: payload.email,
+      role: payload.role,
+    };
+  }
 }

@@ -58,6 +58,16 @@ export class ProfileService {
   async getMyProfile(userId: string): Promise<Profile> {
     const profile = await this.prisma.profile.findUnique({
       where: { userId },
+      include: {
+        user: {
+          select: {
+            userId: true,
+            email: true,
+            name: true,
+            role: true,
+          },
+        },
+      },
     });
 
     if (!profile) {
