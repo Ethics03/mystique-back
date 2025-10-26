@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../auth/prisma.service';
-import { Profile, Status } from '@prisma/client';
+import { Profile, Role, Status } from '@prisma/client';
 
 interface ProfileFilters {
   status?: Status;
@@ -55,26 +55,58 @@ export class ProfileService {
   }
 
   //getting the profile
-  async getMyProfile(userId: string): Promise<Profile> {
-    const profile = await this.prisma.profile.findUnique({
-      where: { userId },
-      include: {
-        user: {
-          select: {
-            userId: true,
-            email: true,
-            name: true,
-            role: true,
-          },
+ async getMyProfile(userId: string) {
+  
+  const user = await this.prisma.user.findUnique({
+    where: { userId },
+  });
+
+  if (!user) {
+    throw new NotFoundException('User not found');
+  }
+
+  
+  //this is for admin to validate access to dashboard 
+  if (user.role === Role.ADMIN) {
+    return {
+      user: {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      
+      id: 0,
+      userId: user.userId,
+      contact: '0000000000',
+      collegeName: 'Admin',
+      status: Status.APPROVED,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+  }
+
+ 
+  const profile = await this.prisma.profile.findUnique({
+    where: { userId },
+    include: {
+      user: {
+        select: {
+          userId: true,
+          name: true,
+          email: true,
+          role: true,
         },
       },
-    });
+    },
+  });
 
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
-    return profile;
+  if (!profile) {
+    throw new NotFoundException('Profile not found');
   }
+
+  return profile;
+}
 
   async updateProfile(
     userId: string,

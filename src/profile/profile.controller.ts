@@ -61,7 +61,7 @@ export class ProfileController {
   //getting own profile
   @Get('me')
   @UseGuards(JwtAuthGuard)
-  async getMyProfile(@CurrentUser() user: UserPayload): Promise<Profile> {
+  async getMyProfile(@CurrentUser() user: UserPayload): Promise<any> {
     return this.profileService.getMyProfile(user.userId);
   }
 
