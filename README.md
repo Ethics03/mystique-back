@@ -108,20 +108,60 @@ The API documentation is available at:
 - Swagger UI: `http://localhost:5553/api`
 - OpenAPI JSON: `http://localhost:5553/api-json`
 
-## 📚 Available Scripts
+## � Docker Support
+
+### Development with Docker
+
+```bash
+# Start the development environment
+pnpm docker:dev
+
+# Start and rebuild containers
+pnpm docker:dev:build
+
+# Stop containers
+pnpm docker:down
+```
+
+### Production with Docker
+
+```bash
+# Build production image
+pnpm docker:build
+
+# Run production container
+pnpm docker:run
+```
+
+### Docker Configuration
+- Development setup includes hot-reload
+- PostgreSQL container for local development
+- Multi-stage build for smaller production image
+- Volume mapping for persistent data
+- Environment variable support
+
+## �📚 Available Scripts
 
 ```bash
 # Development
 pnpm start:dev     # Start with hot-reload
+pnpm docker:dev    # Start with Docker Compose
 
 # Production
 pnpm build         # Build the application
 pnpm start:prod    # Start production server
+pnpm docker:build  # Build Docker image
+pnpm docker:run    # Run Docker container
 
 # Testing
 pnpm test         # Run unit tests
 pnpm test:e2e     # Run e2e tests
 pnpm test:cov     # Generate coverage reports
+
+# Docker Commands
+pnpm docker:dev        # Start development environment
+pnpm docker:dev:build  # Rebuild and start development
+pnpm docker:down       # Stop Docker Compose services
 ```
 
 ## 🤝 Contributing
