@@ -206,47 +206,72 @@ export class ParticipantsService {
             filledSlots: { decrement: 1 },
           },
         }),
-        //delete on rejection
-        this.prisma.participant.delete({
+      
+        this.prisma.participant.update({
           where: { id },
+          data: {
+            status: Status.REJECTED,  
+          }
         }),
       ]);
     } else {
-      // Just delete if pending
-      await this.prisma.participant.delete({
-        where: { id },
-      });
+
+      this.prisma.participant.update({
+          where: { id },
+          data: {
+            status: Status.REJECTED,  
+          }
+        })
     }
 
     return { message: 'Participant rejected and removed' };
   }
 
-  async updateParticipant(
+    async updateParticipant(
     id: number,
     clId: string,
     data: UpdateParticipantDto,
   ) {
     const participant = await this.prisma.participant.findUnique({
       where: { id },
+      include: { event: true },
     });
 
     if (!participant) {
       throw new NotFoundException('Participant not found');
     }
 
+    //ownership check
     if (participant.clId !== clId) {
       throw new ForbiddenException('You can only update your own participants');
     }
 
-    if (participant.status !== Status.PENDING) {
-      throw new BadRequestException('Cannot update approved participants');
+  
+    if (participant.status === Status.APPROVED) {
+      return await this.prisma.$transaction([
+        this.prisma.event.update({
+          where: { eventId: participant.eventId },
+          data: {
+            filledSlots: { decrement: 1 },
+          },
+        }),
+    
+        this.prisma.participant.update({
+          where: { id },
+          data: {
+            ...data,
+            status: Status.PENDING, 
+          },
+        }),
+      ]).then((results) => results[1]); 
     }
 
     return this.prisma.participant.update({
       where: { id },
-      data,
+      data
     });
   }
+
 
   async deleteParticipant(id: number, clId: string) {
     const participant = await this.prisma.participant.findUnique({

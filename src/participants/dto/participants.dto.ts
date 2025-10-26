@@ -1,4 +1,5 @@
 import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateParticipantDto {
   @IsString()
@@ -29,7 +30,7 @@ export class CreateParticipantDto {
   eventId: string;
 }
 
-export class UpdateParticipantDto {
+export class UpdateParticipantDto extends PartialType(CreateParticipantDto) {
   @IsString()
   @IsNotEmpty()
   name?: string;
