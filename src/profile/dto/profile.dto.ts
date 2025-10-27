@@ -4,6 +4,7 @@ import {
   Length,
   Matches,
   IsOptional,
+  MaxLength,
 } from '@nestjs/class-validator';
 
 export class CreateProfileDto {
@@ -44,4 +45,11 @@ export class UpdateProfileDto {
   @IsString()
   @Length(3, 200)
   collegeName?: string;
+}
+
+export class RejectProfileDto {
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  rejectionReason?: string;
 }

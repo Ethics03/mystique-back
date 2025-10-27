@@ -18,7 +18,11 @@ import { JwtAuthGuard } from '../auth/guards/jwt-roles.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/user.decorator';
-import { CreateProfileDto, UpdateProfileDto } from './dto/profile.dto';
+import {
+  CreateProfileDto,
+  RejectProfileDto,
+  UpdateProfileDto,
+} from './dto/profile.dto';
 
 interface ProfileWithUser extends Profile {
   user: {
@@ -115,8 +119,12 @@ export class ProfileController {
   @Roles(Role.ADMIN)
   async rejectProfile(
     @Param('id', ParseIntPipe) id: number,
+    @Body() body: RejectProfileDto,
   ): Promise<ProfileResponse> {
-    const profile = await this.profileService.rejectProfile(id);
+    const profile = await this.profileService.rejectProfile(
+      id,
+      body.rejectionReason,
+    );
     return { message: 'profile successfully rejected', profile };
   }
 }

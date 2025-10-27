@@ -190,7 +190,10 @@ export class ProfileService {
   }
 
   //rejecting profile
-  async rejectProfile(profileId: number): Promise<Profile> {
+  async rejectProfile(
+    profileId: number,
+    rejectionReason?: string,
+  ): Promise<Profile> {
     const profile = await this.prisma.profile.findUnique({
       where: { id: profileId },
     });
@@ -199,14 +202,11 @@ export class ProfileService {
       throw new NotFoundException('profile not found');
     }
 
-    if (profile.status === Status.REJECTED) {
-      throw new BadRequestException('profile already rejected');
-    }
-
     return await this.prisma.profile.update({
       where: { id: profileId },
       data: {
         status: Status.REJECTED,
+        rejectionReason: rejectionReason || null,
       },
     });
   }
