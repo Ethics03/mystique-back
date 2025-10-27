@@ -16,6 +16,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-roles.guard';
 import { CurrentUser } from '../auth/decorators/user.decorator';
 import {
   CreateParticipantDto,
+  RejectParticipantDto,
   UpdateParticipantDto,
 } from './dto/participants.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -80,8 +81,11 @@ export class ParticipantsController {
   @Patch(':id/reject')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
-  async rejectParticipant(@Param('id', ParseIntPipe) id: number) {
-    return this.participantService.rejectParticipant(id);
+  async rejectParticipant(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: RejectParticipantDto,
+  ) {
+    return this.participantService.rejectParticipant(id, body.rejectionReason);
   }
 
   @Delete(':id')

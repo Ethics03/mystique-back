@@ -186,7 +186,7 @@ export class ParticipantsService {
     return { message: 'Participant approved successfully' };
   }
 
-  async rejectParticipant(id: number) {
+  async rejectParticipant(id: number, rejectionReason?: string) {
     const participant = await this.prisma.participant.findUnique({
       where: { id },
       include: { event: true },
@@ -206,28 +206,29 @@ export class ParticipantsService {
             filledSlots: { decrement: 1 },
           },
         }),
-      
+
         this.prisma.participant.update({
           where: { id },
           data: {
-            status: Status.REJECTED,  
-          }
+            status: Status.REJECTED,
+            rejectionReason: rejectionReason || null,
+          },
         }),
       ]);
     } else {
-
-      this.prisma.participant.update({
-          where: { id },
-          data: {
-            status: Status.REJECTED,  
-          }
-        })
+      await this.prisma.participant.update({
+        where: { id },
+        data: {
+          status: Status.REJECTED,
+          rejectionReason: rejectionReason || null,
+        },
+      });
     }
 
-    return { message: 'Participant rejected and removed' };
+    return { message: 'Participant rejected', reason: rejectionReason };
   }
 
-    async updateParticipant(
+  async updateParticipant(
     id: number,
     clId: string,
     data: UpdateParticipantDto,
@@ -246,32 +247,32 @@ export class ParticipantsService {
       throw new ForbiddenException('You can only update your own participants');
     }
 
-  
     if (participant.status === Status.APPROVED) {
-      return await this.prisma.$transaction([
-        this.prisma.event.update({
-          where: { eventId: participant.eventId },
-          data: {
-            filledSlots: { decrement: 1 },
-          },
-        }),
-    
-        this.prisma.participant.update({
-          where: { id },
-          data: {
-            ...data, 
-            status: Status.PENDING, 
-          },
-        }),
-      ]).then((results) => results[1]); 
+      return await this.prisma
+        .$transaction([
+          this.prisma.event.update({
+            where: { eventId: participant.eventId },
+            data: {
+              filledSlots: { decrement: 1 },
+            },
+          }),
+
+          this.prisma.participant.update({
+            where: { id },
+            data: {
+              ...data,
+              status: Status.PENDING,
+            },
+          }),
+        ])
+        .then((results) => results[1]);
     }
 
     return this.prisma.participant.update({
       where: { id },
-      data
+      data,
     });
   }
-
 
   async deleteParticipant(id: number, clId: string) {
     const participant = await this.prisma.participant.findUnique({

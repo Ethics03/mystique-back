@@ -1,5 +1,5 @@
+import { IsOptional, MaxLength } from '@nestjs/class-validator';
 import { IsString, IsEmail, IsNotEmpty } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateParticipantDto {
   @IsString()
@@ -30,7 +30,7 @@ export class CreateParticipantDto {
   eventId: string;
 }
 
-export class UpdateParticipantDto extends PartialType(CreateParticipantDto) {
+export class UpdateParticipantDto {
   @IsString()
   @IsNotEmpty()
   name?: string;
@@ -53,4 +53,11 @@ export class UpdateParticipantDto extends PartialType(CreateParticipantDto) {
   @IsString()
   @IsNotEmpty()
   idFileUrl?: string;
+}
+
+export class RejectParticipantDto {
+  @IsString()
+  @IsOptional()
+  @MaxLength(500)
+  rejectionReason?: string;
 }
