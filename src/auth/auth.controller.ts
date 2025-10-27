@@ -20,7 +20,7 @@ import { ValidateTokenDto } from './dto/auth.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('validate')
   async validateToken(@Body() body: ValidateTokenDto, @Res() res: Response) {
@@ -45,9 +45,9 @@ export class AuthController {
           registrationType: user.registrationType,
           profile: user.profile
             ? {
-              status: user.profile.status,
-              collegeName: user.profile.collegeName,
-            }
+                status: user.profile.status,
+                collegeName: user.profile.collegeName,
+              }
             : null,
         },
       });
@@ -77,7 +77,6 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async logout(@Res({ passthrough: true }) response: Response) {
-
     response.clearCookie('access_token', {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',

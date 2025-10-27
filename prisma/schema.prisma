@@ -13,7 +13,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 enum Role {
   ADMIN
   CL
@@ -32,36 +31,33 @@ enum RegistrationType {
 }
 
 model User {
-  id                  Int     @id @default(autoincrement())
-  userId              String  @unique @default(cuid())
-  email               String  @unique
-  name                String
-  registrationType    RegistrationType?
-  isBlocked           Boolean            @default(false)
-  role                Role    @default(CL)
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
-  profile             Profile?
-  participants        Participant[]
-
+  id               Int               @id @default(autoincrement())
+  userId           String            @unique @default(cuid())
+  email            String            @unique
+  name             String
+  registrationType RegistrationType?
+  isBlocked        Boolean           @default(false)
+  role             Role              @default(CL)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  profile          Profile?
+  participants     Participant[]
 }
 
-
 model Profile {
-  id              Int         @id @default(autoincrement())
-  user            User        @relation(fields: [userId], references: [userId])
-  userId          String      @unique
+  id              Int      @id @default(autoincrement())
+  user            User     @relation(fields: [userId], references: [userId])
+  userId          String   @unique
   contact         String
   aadhaarFileUrl  String
   collegeIdUrl    String
   collegeName     String
-  status          Status  @default(PENDING)
+  rejectionReason String?
+  status          Status   @default(PENDING)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-
-   @@index([status])
-
+  @@index([status])
 }
 
 model Participant {
@@ -72,12 +68,13 @@ model Participant {
   contact         String
   aadhaarFileUrl  String
   idFileUrl       String
-  cl              User    @relation(fields: [clId], references: [userId], onDelete: Cascade)
+  cl              User     @relation(fields: [clId], references: [userId], onDelete: Cascade)
   clId            String
-  event           Event   @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
+  event           Event    @relation(fields: [eventId], references: [eventId], onDelete: Cascade)
   eventId         String
   status          Status   @default(PENDING)
-  submittedAt     DateTime?
+  rejectionReason String?
+  submittedAt     DateTime @default(now())
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -85,30 +82,25 @@ model Participant {
   @@index([clId])
   @@index([eventId])
   @@index([status])
- 
 }
 
-
-
-
 model Event {
-  id          Int          @id @default(autoincrement())
-  eventId     String       @unique @default(cuid())
+  id          Int      @id @default(autoincrement())
+  eventId     String   @unique @default(cuid())
   name        String
   category    String
-  isActive    Boolean      @default(true)
+  isActive    Boolean  @default(true)
   description String?
-  minTeamSize      Int
-  maxTeamSize      Int
-  maxSlots         Int
-  filledSlots      Int      @default(0)
-  isLocked    Boolean      @default(false)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  minTeamSize Int
+  maxTeamSize Int
+  maxSlots    Int
+  filledSlots Int      @default(0)
+  isLocked    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   participants Participant[]
 
-   @@index([category])
-   @@index([isActive])
-
+  @@index([category])
+  @@index([isActive])
 }
